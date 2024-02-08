@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+
+
+
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #gameBoard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: max-content;
+            gap: 10px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background: black; /* Initial background color */
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.1s ease; /* Add background-color transition */
+        }
+
+        .card img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            visibility: hidden; /* Initially hide the image */
+        }
+
+        .card.flipped {
+            background-color: white; /* Change the background color to white when flipped */
+        }
+
+        .card.flipped .back img {
+            visibility: visible; /* Show the image when flipped */
+            transition: visibility 0s ease 0.3s; /* Delay the image transition to sync with the background color transition */
+        }
+
+        .card-container {
+            perspective: 1000px;
+        }
+
+        .hide {
+            visibility: hidden; /* Hide the card */
+        }
+    </style>
+</head>
+<body>
+
+
+    <div id="gameBoard"></div>
+
+    <script>
+        let selectedCard = null;
+        let matchedPairs = [];
+
+        function startGame() {
+            const cardCount = 20;
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            gameBoard.style.width = `${Math.sqrt(cardCount) * 110}px`;
+            const cardsArray = generateCards(cardCount);
+            const shuffledCards = shuffle(cardsArray);
+            shuffledCards.forEach(card => {
+                const cardContainer = document.createElement('div');
+                cardContainer.classList.add('card-container');
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                const frontFace = document.createElement('div');
+                frontFace.classList.add('face', 'front');
+                const backFace = document.createElement('div');
+                backFace.classList.add('face', 'back');
+                const image = document.createElement('img');
+                image.src = card;
+                backFace.appendChild(image);
+                cardElement.appendChild(frontFace);
+                cardElement.appendChild(backFace);
+                cardElement.addEventListener('click', () => handleCardClick(cardElement));
+                cardContainer.appendChild(cardElement);
+                gameBoard.appendChild(cardContainer);
+            });
+        }
+
+        function generateCards(count) {
+            const cardsArray = [];
+            const imageURLs = [
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/065bc502-6fde-4029-b79d-38ad67d3802c.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/d8b4deaf-ad34-4cb3-a20b-5b4f5b32f00e.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/b82cfc75-23ff-4d28-8741-2351934f6491.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/e369af3b-84b2-4007-9716-93eed34cf881.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/f950280c-34c1-630b-8970-c5b02f2a14f8.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/c633fdd0-e536-4431-ae1c-aeedd13f12f7.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/113caa2b-7f58-4317-707b-8be14d693692.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/98dba69c-d3fa-c110-93f9-0e75995d492c.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/200df4e1-5289-2e3f-df19-3f42b553dc36.jpg',
+                'https://images.memorix.nl/zaa/thumb/mediabank-horizontal/a4c9d646-4c95-99f4-4d86-8a1ec811a90b.jpg'
+            ];
+            for (let i = 0; i < count; i++) {
+                cardsArray.push(imageURLs[i % imageURLs.length]);
+            }
+            return cardsArray;
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function handleCardClick(card) {
+    // Check if the selected card is already flipped or matched
+    if (card.classList.contains('flipped') || matchedPairs.includes(card)) {
+        return;
+    }
+
+    // Add 'flipped' class to the clicked card to visually indicate it's flipped
+    card.classList.add('flipped');
+
+    // Check if there is already a selected card
+    if (selectedCard) {
+        const selectedImage = selectedCard.querySelector('.back img').src;
+        const currentImage = card.querySelector('.back img').src;
+
+        // Check if the two flipped cards match
+        if (selectedImage === currentImage) {
+            // Add both cards to the matchedPairs array
+            matchedPairs.push(selectedCard, card);
+            // Reset selectedCard to null
+            selectedCard = null;
+        } else {
+            // If the cards don't match, flip them back after a short delay
+            setTimeout(() => {
+                selectedCard.classList.remove('flipped');
+                card.classList.remove('flipped');
+                // Reset selectedCard to null after flipping back
+                selectedCard = null;
+            }, 1000); // Adjust the delay time as needed
+        }
+    } else {
+        // If no card is selected, assign the current card to selectedCard
+        selectedCard = card;
+    }
+}
+
+
+        // Start the game when the page is loaded
+        window.onload = startGame;
+    </script>
+</body>
+</html>
